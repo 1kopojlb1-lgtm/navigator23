@@ -1,0 +1,1054 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Профнавигатор-23</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=PT+Mono&display=swap">
+<style>
+/* Layout: a navigator — compact header with class picker, tabs; tests as a card grid, a focused runner; profile as a dashboard of radar charts + ranked professions. */
+:root {
+  --bg: #eff3f2;
+  --surface: #fafcfb;
+  --ink: #17211f;
+  --muted: #5b6866;
+  --line: #d1dbd9;
+  --accent: #1d6b62;       /* compass teal */
+  --accent-soft: #dcebe8;
+  --amber: #b5741a;
+  --amber-soft: #f5e7d2;
+  --head-bg: #15302c;
+  --head-ink: #eef5f3;
+  --head-muted: #9cbab4;
+  --good: #2f7a45;
+  --bad: #b04a3a;
+  --grid: #c9d4d2;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "PT Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "PT Mono", ui-monospace, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111816; --surface: #18211f; --ink: #e6eeec; --muted: #98aaa6; --line: #2b3835; --accent: #5cc0b2; --accent-soft: #1b3531;
+  --amber: #e2a24a; --amber-soft: #3a2b16; --head-bg: #0b1311; --head-ink: #eef5f3; --head-muted: #9cbab4; --good: #79c48e; --bad: #e98674; --grid: #34433f; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111816; --surface: #18211f; --ink: #e6eeec; --muted: #98aaa6; --line: #2b3835; --accent: #5cc0b2; --accent-soft: #1b3531;
+  --amber: #e2a24a; --amber-soft: #3a2b16; --head-bg: #0b1311; --head-ink: #eef5f3; --head-muted: #9cbab4; --good: #79c48e; --bad: #e98674; --grid: #34433f; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.55 var(--font-body); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+button { font-family: var(--font-body); }
+
+.head { background: var(--head-bg); color: var(--head-ink); }
+.head .wrap { padding-block: 32px 0; display: grid; gap: 20px; }
+.brand { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: end; }
+.head h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 700; }
+.head h1 span { color: var(--amber); display: block; font-size: .36em; font-weight: 500; letter-spacing: .03em; margin-bottom: 10px; }
+.head p { color: var(--head-muted); margin: 12px 0 0; max-width: 60ch; }
+.classpick { display: grid; gap: 8px; justify-items: end; }
+.classpick .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.classpick button { width: 44px; height: 44px; border-radius: 10px; border: 1px solid #ffffff2e; background: transparent; color: var(--head-ink); font: 700 17px var(--font-mono); cursor: pointer; }
+.classpick button[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #1b1408; }
+.classpick .label { color: var(--head-muted); }
+@media (max-width: 720px) { .brand { grid-template-columns: 1fr; } .classpick { justify-items: start; } }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { font: 600 15px var(--font-body); background: transparent; color: var(--head-muted); border: 0; padding: 12px 16px; border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap; }
+.tabs button:hover { color: var(--head-ink); }
+.tabs button[aria-selected="true"] { background: var(--bg); color: var(--ink); }
+
+main .wrap { padding-block: 32px 64px; }
+section > header { display: grid; gap: 8px; margin-bottom: 24px; }
+section > header h2 { font-size: clamp(22px, 3.2vw, 30px); font-weight: 500; }
+section > header p { color: var(--muted); max-width: 66ch; margin: 0; }
+.btn { font: 700 15px var(--font-body); background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 11px 18px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .5; cursor: default; }
+.row-btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* test cards */
+.grouptitle { font: 700 15px var(--font-body); margin: 8px 0 12px; display: flex; gap: 10px; align-items: center; }
+.grouptitle::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 8px; align-content: start; text-align: left; cursor: pointer; color: var(--ink); min-width: 0; }
+.tcard:hover { border-color: var(--accent); }
+.tcard h3 { font: 700 18px/1.3 var(--font-body); }
+.tcard p { margin: 0; color: var(--muted); font-size: 15px; }
+.tcard .meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); font-family: var(--font-mono); margin-top: 4px; }
+.badge { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.badge.done { background: var(--accent-soft); color: var(--accent); }
+.badge.new { border: 1px solid var(--line); color: var(--muted); }
+.progressline { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.bar { flex: 1; min-width: 160px; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+
+/* runner */
+.runner { max-width: 760px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: grid; gap: 18px; }
+.runner .top { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.steps { display: flex; gap: 3px; }
+.steps i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+.steps i.on { background: var(--accent); }
+.runner h3.q { font: 700 21px/1.4 var(--font-body); }
+.opts { display: grid; gap: 8px; }
+.opts button { text-align: left; font: 16px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; }
+.opts button:hover { border-color: var(--accent); }
+.opts button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale button { font: 14px/1.25 var(--font-body); padding: 12px 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.scale button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+@media (max-width: 560px) { .scale { grid-template-columns: 1fr; } }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair button { min-height: 96px; font: 17px/1.35 var(--font-body); text-align: center; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.pair button:hover { border-color: var(--accent); }
+@media (max-width: 480px) { .pair { grid-template-columns: 1fr; } }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font: 600 14px var(--font-body); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.review { display: grid; gap: 10px; }
+.review div { border-left: 3px solid var(--good); padding: 4px 0 4px 12px; font-size: 15px; }
+.review div.no { border-color: var(--bad); }
+.review b { display: block; }
+.review span { color: var(--muted); }
+.big { font-family: var(--font-display); font-size: 40px; color: var(--accent); font-weight: 500; }
+
+/* profile */
+.dash { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .dash { grid-template-columns: 1fr; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.panel.wide { grid-column: 1 / -1; }
+.panel h3 { font: 700 18px var(--font-body); }
+.panel .sub { color: var(--muted); font-size: 14.5px; margin: -6px 0 0; }
+.chart { overflow-x: auto; }
+.chart svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+.code { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.code b { font-family: var(--font-display); font-size: 34px; font-weight: 500; color: var(--accent); letter-spacing: .04em; }
+.hbars { display: grid; gap: 12px; }
+.hbar { display: grid; grid-template-columns: 130px 1fr 48px; gap: 10px; align-items: center; font-size: 15px; }
+.hbar .track { height: 12px; background: var(--line); border-radius: 0 4px 4px 0; position: relative; }
+.hbar .track i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 0 4px 4px 0; }
+.hbar b { font-family: var(--font-mono); font-weight: 400; text-align: right; font-variant-numeric: tabular-nums; }
+.hbar.na b, .hbar.na span { color: var(--muted); }
+.guide-box { background: var(--amber-soft); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; }
+.guide-box h4 { margin: 0; font: 700 16px var(--font-body); color: var(--amber); }
+.guide-box ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.emptybox { border: 1px dashed var(--line); border-radius: 12px; padding: 28px 22px; color: var(--muted); background: var(--surface); }
+.emptybox strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 6px; }
+.ai-out { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-height: 60px; }
+.note { font-size: 13.5px; color: var(--muted); }
+
+/* professions */
+.pfilters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.pfilters input { font: 16px var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; min-width: 0; flex: 1 1 200px; max-width: 320px; }
+.plist { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.prof { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.prof .ph { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
+.prof h3 { font: 700 18px/1.3 var(--font-body); }
+.match { font-family: var(--font-mono); font-size: 13px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; background: var(--accent-soft); color: var(--accent); }
+.match.hi { background: var(--accent); color: var(--surface); }
+.prof dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14.5px; }
+.prof dt { color: var(--muted); }
+.prof dd { margin: 0; min-width: 0; }
+.prof .ai { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; }
+.prof .ai::before { content: "ИИ в профессии: "; font-weight: 700; color: var(--amber); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-family: var(--font-mono); font-size: 11.5px; padding: 1px 7px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+
+/* teacher */
+table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-weight: 700; color: var(--muted); font-size: 13px; }
+.tablewrap { overflow-x: auto; }
+footer { border-top: 1px solid var(--line); }
+footer .wrap { padding-block: 22px; font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
+@media (prefers-reduced-motion: no-preference) { section[data-panel]:not([hidden]), .runner { animation: rise .22s ease-out; } @keyframes rise { from { transform: translateY(6px); } to { transform: none; } } }
+</style>
+
+<div class="head"><div class="wrap">
+  <div class="brand">
+    <div>
+      <h1><span>МАОУ СОШ № 23 г. Липецка · профориентация с ИИ</span>Профнавигатор-23</h1>
+      <p>Тесты на интересы, характер и способности. По итогам — профиль на диаграммах, подходящие профессии, советы для твоего класса и заключение ИИ-консультанта.</p>
+    </div>
+    <div class="classpick">
+      <span class="label">Мой класс</span>
+      <div class="row" id="classpick" role="group" aria-label="Выбор класса"></div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Разделы">
+    <button role="tab" id="t-testy" data-tab="testy" aria-selected="true">Тесты</button>
+    <button role="tab" id="t-profil" data-tab="profil" aria-selected="false">Мой профиль</button>
+    <button role="tab" id="t-professii" data-tab="professii" aria-selected="false">Профессии</button>
+    <button role="tab" id="t-pedagog" data-tab="pedagog" aria-selected="false" hidden>Для педагога</button>
+  </nav>
+</div></div>
+
+<main><div class="wrap">
+  <section data-panel="testy" role="tabpanel" aria-labelledby="t-testy">
+    <div id="testsHome">
+      <header>
+        <span class="label" id="classLabel">Тесты для 9 класса</span>
+        <h2>Пройди тесты в любом порядке</h2>
+        <p>Психологические тесты не делят ответы на правильные и неправильные: отвечай так, как есть на самом деле. Тесты способностей подобраны под твой класс.</p>
+      </header>
+      <div class="progressline"><span class="label" id="progLabel">Пройдено 0 из 7</span><div class="bar"><i id="progBar" style="width:0%"></i></div><button class="btn ghost" id="toProfile" type="button">Смотреть профиль</button></div>
+      <div id="testGroups"></div>
+    </div>
+    <div id="runnerBox" hidden></div>
+  </section>
+
+  <section data-panel="profil" role="tabpanel" aria-labelledby="t-profil" hidden>
+    <header>
+      <span class="label" id="profLabel">Профиль ученика</span>
+      <h2>Мой профориентационный профиль</h2>
+      <p>Диаграммы строятся по пройденным тестам. Чем больше тестов пройдено, тем точнее рекомендации.</p>
+    </header>
+    <div id="profileBody"></div>
+  </section>
+
+  <section data-panel="professii" role="tabpanel" aria-labelledby="t-professii" hidden>
+    <header>
+      <span class="label">Каталог</span>
+      <h2>Профессии и где им учиться</h2>
+      <p>Процент совпадения появляется после тестов. Учебные заведения указаны для ориентира: правила приёма и экзамены проверяйте на их сайтах.</p>
+    </header>
+    <div class="pfilters" id="pfilters">
+      <input id="psearch" type="search" placeholder="Поиск профессии" aria-label="Поиск профессии">
+    </div>
+    <div class="plist" id="plist"></div>
+  </section>
+
+  <section data-panel="pedagog" role="tabpanel" aria-labelledby="t-pedagog" hidden>
+    <header>
+      <span class="label">Только для педагогов</span>
+      <h2>Сводка по классам</h2>
+      <p>Сводные итоги без имён: класс, ведущий тип интересов и средние баллы. Ученики видят только свои результаты.</p>
+    </header>
+    <div id="teacherBody"><div class="emptybox"><strong>Данных пока нет</strong>Сводка появится, когда ученики начнут проходить тесты.</div></div>
+  </section>
+</div></main>
+
+<footer><div class="wrap">
+  <span>Проект «Профнавигатор-23» · МАОУ СОШ № 23 имени С. В. Добрина г. Липецка · 2026–2027</span>
+  <span>Методики: типология интересов Дж. Холланда, классификация сфер труда Е. А. Климова (вопросы адаптированы для проекта). Результаты — повод для разговора с классным руководителем и родителями, а не диагноз.</span>
+</div></footer>
+
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+/* ================= DATA ================= */
+const HOLLAND = {
+  R: { name: 'Практик', full: 'Реалистический', d: 'Любишь делать руками, работать с техникой, инструментами, на природе. Ценишь понятный осязаемый результат.' },
+  I: { name: 'Исследователь', full: 'Исследовательский', d: 'Тебе интересно разбираться, как всё устроено, решать трудные задачи, искать закономерности.' },
+  A: { name: 'Творец', full: 'Артистический', d: 'Тебе важно выражать себя: рисовать, писать, выступать, придумывать новое и необычное.' },
+  S: { name: 'Помощник', full: 'Социальный', d: 'Тебе нравится общаться, объяснять, заботиться о людях и помогать им.' },
+  E: { name: 'Лидер', full: 'Предприимчивый', d: 'Ты любишь организовывать, убеждать, брать ответственность и добиваться цели.' },
+  C: { name: 'Организатор', full: 'Конвенциональный', d: 'Тебе комфортно, когда есть порядок, правила и точность: таблицы, документы, расчёты.' }
+};
+const HORDER = ['R', 'I', 'A', 'S', 'E', 'C'];
+const HQ = [
+  ['R','Мне нравится мастерить, собирать и чинить вещи своими руками.'],['I','Мне интересно решать сложные задачи и головоломки.'],['A','Я люблю рисовать, сочинять или заниматься музыкой.'],['S','Мне нравится объяснять другим то, что я понял сам.'],['E','Мне нравится руководить командой и распределять задачи.'],['C','Я люблю, когда вещи и записи лежат в полном порядке.'],
+  ['R','Мне интересно, как устроены машины, приборы и механизмы.'],['I','Я с удовольствием читаю или смотрю научно-популярное.'],['A','Я часто придумываю необычные идеи и истории.'],['S','Ко мне часто обращаются за советом или поддержкой.'],['E','Я умею убеждать людей и отстаивать своё мнение.'],['C','Мне нравится работать по чёткому плану и инструкции.'],
+  ['R','Я предпочёл бы работать на улице, а не в офисе.'],['I','Мне нравится ставить опыты и проверять свои догадки.'],['A','Мне нравится выступать на сцене или перед камерой.'],['S','Мне интересно работать с детьми или пожилыми людьми.'],['E','Я люблю организовывать праздники, походы, мероприятия.'],['C','Мне нравится аккуратно заполнять таблицы и считать.'],
+  ['R','Мне нравится работать с инструментами, станками или техникой.'],['I','Мне интересно программировать или разбираться в данных.'],['A','Я замечаю красоту в цветах, формах, звуках.'],['S','Я хотел бы участвовать в волонтёрских делах.'],['E','Мне нравится соревноваться и побеждать.'],['C','Я легко нахожу ошибки и неточности в тексте или расчётах.'],
+  ['R','Мне нравится заниматься спортом, походами, физическим трудом.'],['I','Я люблю спрашивать «почему?» и искать ответ сам.'],['A','Мне нравится оформлять: делать дизайн, фото, видео.'],['S','Я умею выслушать человека и понять его чувства.'],['E','Я придумываю, как можно заработать или запустить своё дело.'],['C','Я планирую свои дела заранее и придерживаюсь расписания.']
+];
+const SCALE5 = ['Совсем не про меня', 'Скорее нет', 'Иногда', 'Скорее да', 'Точно про меня'];
+
+const SOFT = { com: 'Общение', team: 'Команда', lead: 'Лидерство', cre: 'Креативность', crit: 'Критическое мышление', self: 'Самоорганизация' };
+const SORDER = ['com', 'team', 'lead', 'cre', 'crit', 'self'];
+const SQ = [
+  ['com','Мне легко заговорить с незнакомым человеком.'],['team','В групповом проекте я учитываю мнение других.'],['lead','Когда команда растерялась, я беру инициативу на себя.'],['cre','Я нахожу несколько решений одной задачи.'],['crit','Я проверяю информацию, прежде чем ей поверить.'],['self','Я выполняю задания в срок без напоминаний.'],
+  ['com','Я могу понятно объяснить сложную мысль.'],['team','Я готов взять на себя скучную, но нужную часть общей работы.'],['lead','Мне доверяют быть старостой, капитаном или ведущим.'],['cre','Мне нравится придумывать что-то новое, а не делать по образцу.'],['crit','Я замечаю, когда в рассуждении есть ошибка.'],['self','Я умею разбить большое дело на маленькие шаги.'],
+  ['com','Я спокойно выступаю перед классом.'],['team','В споре я ищу решение, которое устроит всех.'],['lead','Я умею мотивировать других довести дело до конца.'],['cre','Я легко нахожу, как использовать вещь не по назначению.'],['crit','Я могу аргументированно не согласиться с мнением большинства.'],['self','Я редко откладываю дела на потом.']
+];
+
+const KLIMOV = { P: 'Человек — Природа', T: 'Человек — Техника', H: 'Человек — Человек', Z: 'Человек — Знак', X: 'Человек — Образ' };
+const KSHORT = { P: 'Природа', T: 'Техника', H: 'Человек', Z: 'Знаковая система', X: 'Худ. образ' };
+const KDESC = {
+  P: 'Работа с растениями, животными, землёй, водой: агроном, ветеринар, эколог, геолог.',
+  T: 'Работа с машинами, механизмами, энергией: инженер, механик, оператор станков, электрик.',
+  H: 'Работа с людьми: учить, лечить, обслуживать, руководить, защищать.',
+  Z: 'Работа с цифрами, текстами, кодами, документами: программист, экономист, переводчик.',
+  X: 'Создание образов: дизайн, музыка, театр, литература, фото и видео.'
+};
+const KORDER = ['P', 'T', 'H', 'Z', 'X'];
+const KQ = [
+  ['P','Ухаживать за животными','T','Обслуживать машины и станки'],['H','Помогать больным людям','Z','Составлять таблицы, схемы, программы'],['X','Оформлять книги и плакаты','P','Следить за состоянием растений'],['T','Собирать и налаживать технику','H','Объяснять, учить, консультировать'],['Z','Проверять тексты на ошибки','X','Сочинять музыку или рассказы'],
+  ['P','Изучать жизнь растений и животных','H','Организовывать работу людей'],['T','Чинить электроприборы','Z','Работать с формулами и расчётами'],['X','Ставить спектакли','H','Защищать права людей'],['P','Выращивать растения','Z','Переводить тексты с иностранного языка'],['T','Конструировать роботов','X','Фотографировать и снимать видео'],
+  ['P','Проверять качество почвы и воды','T','Управлять краном, трактором или поездом'],['H','Встречать и обслуживать клиентов','Z','Вести учёт и бухгалтерию'],['X','Придумывать дизайн интерьеров','P','Работать в заповеднике или лесничестве'],['T','Программировать станки на заводе','H','Работать вожатым в детском лагере'],['Z','Писать компьютерные программы','X','Рисовать иллюстрации'],
+  ['P','Лечить животных','H','Лечить людей'],['T','Строить дома и мосты','Z','Составлять и проверять документы'],['X','Петь или играть на инструменте','H','Договариваться и продавать'],['P','Наблюдать за погодой и климатом','Z','Изучать языки, коды и шифры'],['T','Ремонтировать автомобили','X','Делать мебель или украшения по своим эскизам']
+];
+
+const VALUES = { money: 'Высокий доход', creative: 'Творчество', help: 'Помогать людям', stable: 'Стабильность', free: 'Свободный график', career: 'Карьерный рост', tech: 'Работа с техникой', nature: 'Работа на природе', fame: 'Признание', team: 'Работа в команде' };
+
+/* knowledge tests: per band. q, options, answer index, explanation */
+const KNOW = {
+  logic: { title: 'Логическое мышление', short: 'Логика', bands: {
+    A: [
+      ['Продолжи ряд: 2, 4, 8, 16, …', ['24', '30', '32', '18'], 2, 'Каждое число вдвое больше предыдущего: 16 × 2 = 32.'],
+      ['Все кошки любят молоко. Мурка — кошка. Значит…', ['Мурка любит молоко', 'Мурка не любит молоко', 'Все, кто любит молоко, — кошки', 'Ничего сказать нельзя'], 0, 'Если правило верно для всех кошек, оно верно и для Мурки.'],
+      ['Петя выше Коли, Коля выше Саши. Кто самый низкий?', ['Петя', 'Коля', 'Саша', 'Нельзя определить'], 2, 'Петя > Коля > Саша, значит, Саша самый низкий.'],
+      ['Какое слово лишнее: яблоко, груша, морковь, слива?', ['Яблоко', 'Груша', 'Морковь', 'Слива'], 2, 'Морковь — овощ, остальные — фрукты.'],
+      ['Продолжи ряд: 1, 3, 6, 10, …', ['13', '14', '15', '16'], 2, 'Прибавляем 2, 3, 4, затем 5: 10 + 5 = 15.'],
+      ['Сколько концов у двух с половиной палок?', ['4', '5', '6', '7'], 2, 'У половинки палки тоже два конца: 2 + 2 + 2 = 6.'],
+      ['Сегодня среда. Какой день недели будет через 10 дней?', ['Пятница', 'Суббота', 'Воскресенье', 'Четверг'], 1, 'Через 7 дней снова среда, ещё через 3 дня — суббота.'],
+      ['Рыба — вода, птица — …', ['Гнездо', 'Воздух', 'Крылья', 'Дерево'], 1, 'Рыба живёт и движется в воде, птица — в воздухе.']
+    ],
+    B: [
+      ['Продолжи ряд: 3, 9, 27, 81, …', ['162', '243', '108', '324'], 1, 'Каждое число втрое больше предыдущего: 81 × 3 = 243.'],
+      ['Некоторые школьники — спортсмены. Все спортсмены дисциплинированны. Верно ли, что некоторые школьники дисциплинированны?', ['Да, обязательно', 'Нет', 'Только если все школьники спортсмены', 'Определить нельзя'], 0, 'Те школьники, что спортсмены, дисциплинированны.'],
+      ['Иван, Олег и Пётр: шахматист, футболист и пловец. Иван не играет в шахматы и не плавает. Олег не плавает. Кто пловец?', ['Иван', 'Олег', 'Пётр', 'Нельзя определить'], 2, 'Иван — футболист, Олег — шахматист, значит, Пётр — пловец.'],
+      ['Продолжи ряд: 1, 1, 2, 3, 5, 8, …', ['11', '12', '13', '16'], 2, 'Каждое число — сумма двух предыдущих: 5 + 8 = 13 (числа Фибоначчи).'],
+      ['А больше Б, Б больше В, В больше Г. Что верно наверняка?', ['Г больше А', 'А больше Г', 'Б равно В', 'Ничего'], 1, 'Отношение «больше» переносится по цепочке: А > Г.'],
+      ['Какой угол между стрелками часов ровно в 3:00?', ['60°', '90°', '120°', '45°'], 1, 'Между соседними цифрами 30°, от 12 до 3 — три промежутка: 90°.'],
+      ['Какая фигура лишняя: квадрат, ромб, треугольник, прямоугольник?', ['Квадрат', 'Ромб', 'Треугольник', 'Прямоугольник'], 2, 'Только у треугольника не четыре стороны.'],
+      ['Книга — библиотека, картина — …', ['Художник', 'Музей', 'Рама', 'Краски'], 1, 'Книги собирают и хранят в библиотеке, картины — в музее.']
+    ],
+    C: [
+      ['Продолжи ряд: 2, 6, 12, 20, 30, …', ['40', '42', '44', '36'], 1, 'Разности растут: 4, 6, 8, 10, затем 12: 30 + 12 = 42.'],
+      ['«Если идёт дождь, асфальт мокрый». Асфальт мокрый. Что можно сказать?', ['Дождь точно идёт', 'Дождь точно не идёт', 'Дождь мог идти, но не обязательно', 'Асфальт сухой'], 2, 'Асфальт может быть мокрым по другой причине, например после поливальной машины.'],
+      ['Какое утверждение — отрицание фразы «Все ученики сдали экзамен»?', ['Ни один ученик не сдал', 'Хотя бы один ученик не сдал', 'Все ученики не сдали', 'Некоторые сдали'], 1, 'Чтобы «все сдали» стало ложным, достаточно одного несдавшего.'],
+      ['Какова вероятность, что на игральном кубике выпадет чётное число?', ['1/6', '1/3', '1/2', '2/3'], 2, 'Чётных граней три из шести: 3/6 = 1/2.'],
+      ['В классе 30 учеников. 18 ходят на футбол, 15 — на шахматы, 5 никуда не ходят. Сколько ходят и туда, и туда?', ['3', '5', '8', '10'], 2, 'Хотя бы в один кружок ходят 25. 18 + 15 − 25 = 8.'],
+      ['Продолжи ряд: А, В, Д, Ж, …', ['З', 'И', 'К', 'Е'], 1, 'Буквы идут через одну: А (Б) В (Г) Д (Е) Ж (З) И.'],
+      ['5 машин делают 5 деталей за 5 минут. За сколько минут 100 машин сделают 100 деталей?', ['100', '20', '5', '1'], 2, 'Каждая машина делает одну деталь за 5 минут, поэтому время не меняется.'],
+      ['Врач — диагноз, судья — …', ['Суд', 'Приговор', 'Закон', 'Адвокат'], 1, 'Итог работы врача — диагноз, итог работы судьи — приговор.']
+    ],
+    D: [
+      ['Продолжи ряд: 3, 5, 9, 17, 33, …', ['49', '64', '65', '66'], 2, 'Правило: умножить на 2 и вычесть 1. 33 × 2 − 1 = 65.'],
+      ['Верно: «Если число делится на 6, то оно делится на 3». Что ещё обязательно верно?', ['Если делится на 3, то делится на 6', 'Если не делится на 3, то не делится на 6', 'Если не делится на 6, то не делится на 3', 'Ничего'], 1, 'Это контрапозиция: из «A ⇒ B» следует «не B ⇒ не A».'],
+      ['Из трёх монет одна фальшивая и легче остальных. Сколько взвешиваний на чашечных весах нужно, чтобы её найти?', ['1', '2', '3', '0'], 0, 'Кладём по одной монете на чаши. Если равновесие, фальшивая — третья.'],
+      ['Сколькими способами можно рассадить 4 человека в ряд на 4 стула?', ['16', '12', '24', '8'], 2, '4! = 4 · 3 · 2 · 1 = 24.'],
+      ['«Ни один рыбак не боится воды. Некоторые туристы боятся воды». Какой вывод верен?', ['Некоторые туристы — не рыбаки', 'Все туристы — рыбаки', 'Ни один рыбак не турист', 'Некоторые рыбаки боятся воды'], 0, 'Те туристы, что боятся воды, не могут быть рыбаками.'],
+      ['Цена выросла на 20 %, затем снизилась на 20 %. Что с ценой в итоге?', ['Не изменилась', 'Снизилась на 4 %', 'Выросла на 4 %', 'Снизилась на 2 %'], 1, '1,2 × 0,8 = 0,96, то есть цена снизилась на 4 %.'],
+      ['На острове рыцари всегда говорят правду, лжецы всегда лгут. Может ли житель сказать: «Я лжец»?', ['Да, рыцарь', 'Да, лжец', 'Нет, никто', 'Да, любой'], 2, 'Рыцарь сказал бы неправду, лжец — правду. Оба варианта невозможны.'],
+      ['Гипотеза — эксперимент, законопроект — …', ['Закон', 'Голосование', 'Депутат', 'Конституция'], 1, 'Гипотезу проверяют экспериментом, законопроект — голосованием.']
+    ]
+  } },
+  rus: { title: 'Русский язык', short: 'Русский язык', bands: {
+    A: [
+      ['В каком слове ошибка?', ['Молоко', 'Карова', 'Собака', 'Берёза'], 1, 'Правильно — «корова», это словарное слово.'],
+      ['Какое проверочное слово подходит к «гр_за»?', ['Грузить', 'Грозы', 'Грязный', 'Гроздь'], 1, 'Гроза — грозы: под ударением слышно «о».'],
+      ['Какая часть речи слово «быстро»?', ['Прилагательное', 'Глагол', 'Наречие', 'Существительное'], 2, '«Быстро» отвечает на вопрос «как?» и не изменяется — это наречие.'],
+      ['В каком слове на конце пишется Ь?', ['Мяч_', 'Ноч_', 'Врач_', 'Плащ_'], 1, 'Ночь — существительное женского рода 3-го склонения, после шипящего пишется Ь.'],
+      ['Найди грамматическую основу: «Ученики читают интересную книгу».', ['Ученики читают', 'Читают книгу', 'Интересную книгу', 'Ученики книгу'], 0, 'Подлежащее — «ученики», сказуемое — «читают».'],
+      ['Подбери синоним к слову «смелый».', ['Трусливый', 'Храбрый', 'Весёлый', 'Сильный'], 1, '«Храбрый» близок по значению к «смелый».'],
+      ['В каком предложении нужна запятая?', ['Я пришёл домой и сел за уроки', 'Мама купила яблоки груши и сливы', 'Кот спит на диване', 'Наступила тёплая весна'], 1, 'Однородные члены «яблоки, груши и сливы» без союза разделяются запятой.'],
+      ['Сколько звуков в слове «ель»?', ['2', '3', '4', '1'], 1, '[й’эл’]: буква «е» в начале слова даёт два звука.']
+    ],
+    B: [
+      ['Как правильно: «(не)прочитанная книга» (без пояснительных слов)?', ['Не прочитанная', 'Непрочитанная', 'Оба варианта', 'Не-прочитанная'], 1, 'Полное причастие без зависимых слов пишется с НЕ слитно.'],
+      ['Как правильно?', ['Деревяный', 'Деревянный', 'Деревяннный', 'Деревяной'], 1, '«Деревянный» — одно из исключений: стеклянный, оловянный, деревянный.'],
+      ['В каком предложении верно расставлены знаки препинания?', ['Прочитав книгу я вернул её, в библиотеку.', 'Прочитав книгу, я вернул её в библиотеку.', 'Прочитав, книгу я вернул её в библиотеку.', 'Прочитав книгу я вернул её в библиотеку.'], 1, 'Деепричастный оборот «прочитав книгу» выделяется запятой.'],
+      ['Где ударение поставлено верно?', ['звОнит', 'звонИт', 'звонИт и звОнит', 'звонит без ударения'], 1, 'По норме — звонИт.'],
+      ['Что нужно вставить: «… платье»?', ['Одеть', 'Надеть', 'Оба подходят', 'Обуть'], 1, 'Надеть что-то (платье), одеть кого-то (ребёнка).'],
+      ['Как правильно: «(в)течени_ недели»?', ['Втечении', 'В течении', 'В течение', 'Втечение'], 2, 'Производный предлог «в течение» (о времени) пишется раздельно и с «е» на конце.'],
+      ['Какое это предложение: «Смеркалось.»?', ['Двусоставное', 'Безличное', 'Назывное', 'Неполное'], 1, 'Действие происходит само по себе, подлежащего нет — это безличное предложение.'],
+      ['Как правильно?', ['Преехать', 'Приехать', 'Пре-ехать', 'Пр-ехать'], 1, 'Приставка ПРИ- означает приближение: приехать.']
+    ],
+    C: [
+      ['Какое предложение сложноподчинённое?', ['Светит солнце, и поют птицы.', 'Я знаю, что ты придёшь.', 'Шёл дождь, дул ветер.', 'Мы гуляли и смеялись.'], 1, 'Придаточная часть «что ты придёшь» зависит от главной и присоединяется союзом «что».'],
+      ['В каком слове ударение поставлено НЕВЕРНО?', ['тОрты', 'бАнты', 'катАлог', 'щавЕль'], 2, 'Правильно — каталОг.'],
+      ['Как правильно?', ['Как бы-то ни было', 'Как бы то ни было', 'Как-бы то ни было', 'Как бы то не было'], 1, 'Устойчивое выражение «как бы то ни было» пишется раздельно и с частицей «ни».'],
+      ['В каком предложении правильно выделено вводное слово?', ['Он конечно, прав.', 'Он, конечно прав.', 'Он, конечно, прав.', 'Он конечно прав.'], 2, 'Вводное слово «конечно» выделяется запятыми с двух сторон.'],
+      ['В каком сочетании грамматическая ошибка?', ['Согласно приказу', 'Согласно приказа', 'Благодаря другу', 'Вопреки правилам'], 1, 'Предлог «согласно» требует дательного падежа: согласно чему? — приказу.'],
+      ['Какой вид подчинительной связи в словосочетании «стальной клинок»?', ['Управление', 'Примыкание', 'Согласование', 'Сочинение'], 2, 'Прилагательное согласуется с существительным в роде, числе и падеже.'],
+      ['В каком слове корень с чередованием?', ['Загорать', 'Задумать', 'Записать', 'Заплатить'], 0, 'Корень -гар-/-гор-: загорать — загар.'],
+      ['Какое средство выразительности в выражении «золотая осень»?', ['Сравнение', 'Эпитет', 'Гипербола', 'Олицетворение'], 1, 'Образное определение — это эпитет.']
+    ],
+    D: [
+      ['В каком слове ударение поставлено верно?', ['облЕгчит', 'облегчИт', 'Облегчит', 'облегчит с ударением на «о»'], 1, 'По норме — облегчИт.'],
+      ['В каком сочетании лексическая ошибка (плеоназм)?', ['Памятный сувенир', 'Новый учебник', 'Яркое солнце', 'Тёплый вечер'], 0, 'Сувенир — это и есть подарок на память, слово «памятный» лишнее.'],
+      ['Как правильно: «… дождь, мы пошли гулять»?', ['Не смотря на', 'Несмотря на', 'Несмотря-на', 'Не смотря-на'], 1, '«Несмотря на» — производный предлог, пишется слитно.'],
+      ['Как правильно?', ['Ветреная погода', 'Ветренная погода', 'Ветреннная погода', 'Ветрянная погода'], 0, '«Ветреный» — исключение: в прилагательном одна Н.'],
+      ['В каком предложении верно расставлены запятые?', ['Книга, лежащая на столе принадлежит мне.', 'Книга лежащая на столе, принадлежит мне.', 'Книга, лежащая на столе, принадлежит мне.', 'Книга лежащая, на столе принадлежит мне.'], 2, 'Причастный оборот после определяемого слова выделяется запятыми с двух сторон.'],
+      ['В каком сочетании ошибка в управлении?', ['Оплатить проезд', 'Оплатить за проезд', 'Заплатить за проезд', 'Платить за проезд'], 1, 'Оплатить что? — проезд. «Оплатить за» — ошибка.'],
+      ['В каком слове пишется Ъ?', ['Пред_юбилейный', 'Сер_ёзный', 'Друз_я', 'Солов_и'], 0, 'После приставки, оканчивающейся на согласный, перед Е, Ё, Ю, Я пишется Ъ.'],
+      ['Как правильно?', ['Тем неменее', 'Тем не менее', 'Темнеменее', 'Тем не-менее'], 1, 'Сочетание «тем не менее» пишется в три слова.']
+    ]
+  } },
+  math: { title: 'Математика', short: 'Математика', bands: {
+    A: [
+      ['125 + 375 = ?', ['400', '490', '500', '510'], 2, '125 + 375 = 500.'],
+      ['7 × 8 = ?', ['54', '56', '63', '48'], 1, '7 × 8 = 56.'],
+      ['Сколько будет половина от 36?', ['16', '18', '12', '72'], 1, '36 : 2 = 18.'],
+      ['Чему равен периметр квадрата со стороной 6 см?', ['12 см', '24 см', '36 см', '18 см'], 1, '4 × 6 = 24 см.'],
+      ['Купили 3 тетради по 25 рублей и дали 100 рублей. Сколько сдачи?', ['15', '25', '50', '75'], 1, '3 × 25 = 75; 100 − 75 = 25 рублей.'],
+      ['Сколько минут в 2 ч 15 мин?', ['125', '135', '215', '150'], 1, '2 × 60 + 15 = 135 минут.'],
+      ['Какое число самое большое?', ['0,5', '0,45', '0,405', '0,05'], 0, 'Сравниваем десятые: у 0,5 — пять десятых, это больше всего.'],
+      ['Пешеход идёт со скоростью 5 км/ч. Сколько он пройдёт за 3 часа?', ['8 км', '15 км', '12 км', '35 км'], 1, '5 × 3 = 15 км.']
+    ],
+    B: [
+      ['Реши уравнение: 3x + 5 = 20', ['x = 5', 'x = 15', 'x = 25/3', 'x = 4'], 0, '3x = 15, x = 5.'],
+      ['Сколько составляет 15 % от 200?', ['15', '20', '30', '35'], 2, '200 × 0,15 = 30.'],
+      ['Чему равно (a + b)²?', ['a² + b²', 'a² + 2ab + b²', '2a + 2b', 'a² − 2ab + b²'], 1, 'Формула квадрата суммы.'],
+      ['Чему равна сумма углов треугольника?', ['90°', '180°', '270°', '360°'], 1, 'Сумма углов любого треугольника — 180°.'],
+      ['Площадь прямоугольника со сторонами 8 и 5 см?', ['13 см²', '26 см²', '40 см²', '45 см²'], 2, '8 × 5 = 40 см².'],
+      ['(−3) · (−4) = ?', ['−12', '12', '−7', '7'], 1, 'Минус на минус даёт плюс: 12.'],
+      ['Найди x: 4 / x = 2 / 5', ['8', '10', '2,5', '20'], 1, '2x = 20, x = 10.'],
+      ['Среднее арифметическое чисел 4, 5 и 9?', ['5', '6', '9', '18'], 1, '(4 + 5 + 9) : 3 = 6.']
+    ],
+    C: [
+      ['Корни уравнения x² − 9 = 0', ['x = 3', 'x = ±3', 'x = 9', 'x = ±9'], 1, 'x² = 9, x = 3 или x = −3.'],
+      ['Чему равно y = 2x − 3 при x = 4?', ['5', '8', '11', '−5'], 0, '2 · 4 − 3 = 5.'],
+      ['Катеты прямоугольного треугольника 6 и 8. Чему равна гипотенуза?', ['10', '12', '14', '48'], 0, 'По теореме Пифагора: √(36 + 64) = 10.'],
+      ['Товар стоит 800 рублей, скидка 25 %. Сколько он стоит со скидкой?', ['200', '575', '600', '775'], 2, '800 × 0,75 = 600 рублей.'],
+      ['Арифметическая прогрессия: 3, 7, 11, … Чему равен 10-й член?', ['39', '40', '43', '37'], 0, 'a₁₀ = 3 + 9 · 4 = 39.'],
+      ['√0,81 = ?', ['0,09', '0,9', '9', '0,81'], 1, '0,9 × 0,9 = 0,81.'],
+      ['В коробке 3 красных и 7 синих шаров. Какова вероятность вытащить красный?', ['0,3', '0,7', '3/7', '0,5'], 0, '3 из 10 — это 0,3.'],
+      ['Реши неравенство 2x > 8', ['x > 4', 'x < 4', 'x > 16', 'x > 6'], 0, 'Делим обе части на 2: x > 4.']
+    ],
+    D: [
+      ['log₂ 32 = ?', ['4', '5', '6', '16'], 1, '2⁵ = 32.'],
+      ['Чему равна производная функции x³?', ['3x', 'x²', '3x²', 'x⁴/4'], 2, '(xⁿ)′ = n · xⁿ⁻¹, значит, 3x².'],
+      ['sin 30° = ?', ['1/2', '√3/2', '√2/2', '1'], 0, 'Табличное значение: sin 30° = 1/2.'],
+      ['Реши уравнение 2ˣ = 64', ['5', '6', '8', '32'], 1, '2⁶ = 64.'],
+      ['Вклад 10 000 ₽ под 10 % годовых с капитализацией. Сколько будет через 2 года?', ['12 000 ₽', '12 100 ₽', '11 000 ₽', '12 210 ₽'], 1, '10 000 · 1,1² = 12 100 ₽.'],
+      ['Объём куба с ребром 3 см?', ['9 см³', '18 см³', '27 см³', '81 см³'], 2, '3³ = 27 см³.'],
+      ['Реши уравнение √(x + 1) = 3', ['2', '8', '9', '10'], 1, 'x + 1 = 9, x = 8.'],
+      ['Чему равна производная функции y = x² в точке x = 3?', ['3', '6', '9', '2'], 1, 'y′ = 2x, при x = 3 получаем 6.']
+    ]
+  } }
+};
+const BAND_OF = { 5: 'A', 6: 'A', 7: 'B', 8: 'B', 9: 'C', 10: 'D', 11: 'D' };
+const BAND_NAME = { A: '5–6 класс', B: '7–8 класс', C: '9 класс', D: '10–11 класс' };
+
+/* professions: h = Holland code, k = Klimov sphere, a = ability weights (l logic, r russian, m math), v = values */
+const PROF = [
+  { n: 'Инженер-металлург', h: 'RI', k: 'T', a: { l: .7, m: .9 }, v: ['tech', 'stable', 'career'], s: 'Математика, физика или химия', w: 'ЛГТУ; Липецкий металлургический колледж. Крупный работодатель — НЛМК', ai: 'ИИ подсказывает режимы плавки, инженер проверяет и отвечает за решение.' },
+  { n: 'Программист', h: 'IC', k: 'Z', a: { l: .9, m: .8 }, v: ['money', 'free', 'tech'], s: 'Математика, информатика', w: 'ЛГТУ; IT-колледжи и вузы Липецка и Воронежа', ai: 'ИИ пишет часть кода, ценится умение ставить задачу и проверять результат.' },
+  { n: 'Специалист по данным и ИИ', h: 'IC', k: 'Z', a: { l: .9, m: .9 }, v: ['money', 'career', 'tech'], s: 'Математика, информатика', w: 'ЛГТУ; ВГУ (Воронеж); вузы Москвы', ai: 'Профессия растёт вместе с ИИ: такие специалисты обучают и проверяют модели.' },
+  { n: 'Специалист по кибербезопасности', h: 'IC', k: 'Z', a: { l: .9, m: .8 }, v: ['money', 'tech', 'career'], s: 'Математика, информатика', w: 'ЛГТУ; ВГТУ (Воронеж)', ai: 'Злоумышленники тоже используют ИИ, поэтому спрос на защиту растёт.' },
+  { n: 'Инженер-робототехник', h: 'RI', k: 'T', a: { l: .8, m: .8 }, v: ['tech', 'creative', 'career'], s: 'Математика, физика, информатика', w: 'ЛГТУ; ВГТУ (Воронеж)', ai: 'Роботы с ИИ появляются на заводах и складах, их нужно проектировать и обслуживать.' },
+  { n: 'Инженер-строитель', h: 'RC', k: 'T', a: { l: .7, m: .8 }, v: ['stable', 'tech', 'career'], s: 'Математика, физика', w: 'ЛГТУ; ВГТУ (Воронеж)', ai: 'ИИ помогает с расчётами и моделями зданий, ответственность за проект — на инженере.' },
+  { n: 'Архитектор', h: 'AI', k: 'X', a: { l: .6, m: .7 }, v: ['creative', 'fame', 'career'], s: 'Математика, творческое испытание (рисунок)', w: 'ВГТУ (Воронеж); вузы Москвы', ai: 'ИИ генерирует варианты планировок, архитектор выбирает и отвечает за замысел.' },
+  { n: 'Оператор станков с ЧПУ', h: 'RC', k: 'T', a: { l: .6, m: .6 }, v: ['tech', 'stable'], s: 'После 9 класса — колледж', w: 'Колледжи Липецка (программа «Профессионалитет»)', ai: 'Станки становятся умнее, нужен человек, который их настраивает и контролирует.' },
+  { n: 'Электромонтажник', h: 'RC', k: 'T', a: { l: .5, m: .5 }, v: ['stable', 'tech'], s: 'После 9 класса — колледж', w: 'Технические колледжи Липецка', ai: 'Ручную работу с проводкой ИИ не заменит, растёт спрос на «умные» системы.' },
+  { n: 'Автомеханик', h: 'RC', k: 'T', a: { l: .5, m: .4 }, v: ['tech', 'stable', 'free'], s: 'После 9 класса — колледж', w: 'Липецкий колледж транспорта и дорожного хозяйства', ai: 'Диагностика всё чаще идёт через компьютер, но ремонт делают руками.' },
+  { n: 'Врач', h: 'IS', k: 'H', a: { l: .7, r: .5, m: .5 }, v: ['help', 'stable', 'fame'], s: 'Химия, биология', w: 'ВГМУ им. Н. Н. Бурденко (Воронеж); после 9 класса — Липецкий медицинский колледж', ai: 'ИИ помогает читать снимки и анализы, решение и общение с пациентом за врачом.' },
+  { n: 'Медсестра, фельдшер', h: 'SR', k: 'H', a: { l: .4, r: .4 }, v: ['help', 'stable', 'team'], s: 'Биология (после 9 или 11 класса)', w: 'Липецкий медицинский колледж', ai: 'Забота о человеке остаётся живой работой, ИИ берёт на себя часть документов.' },
+  { n: 'Ветеринарный врач', h: 'RS', k: 'P', a: { l: .6, m: .4 }, v: ['nature', 'help'], s: 'Биология, химия', w: 'Воронежский ГАУ', ai: 'ИИ помогает в диагностике, лечение и уход остаются за врачом.' },
+  { n: 'Агроном', h: 'RI', k: 'P', a: { l: .5, m: .5 }, v: ['nature', 'stable'], s: 'Биология, химия, математика', w: 'Воронежский ГАУ; аграрные колледжи области', ai: 'Дроны и ИИ следят за полями, агроном принимает решения по урожаю.' },
+  { n: 'Эколог', h: 'IR', k: 'P', a: { l: .7, m: .6 }, v: ['nature', 'help'], s: 'Биология, география, химия', w: 'ЛГТУ; ВГУ (Воронеж)', ai: 'ИИ обрабатывает данные датчиков, эколог проверяет их и предлагает меры.' },
+  { n: 'Геолог', h: 'IR', k: 'P', a: { l: .7, m: .6 }, v: ['nature', 'free'], s: 'Математика, физика или география', w: 'ВГУ (Воронеж). Липецкие залежи руды разведывали ещё в XVIII веке', ai: 'ИИ ищет закономерности в данных разведки, полевую работу выполняет геолог.' },
+  { n: 'Учитель', h: 'SA', k: 'H', a: { r: .8, l: .5 }, v: ['help', 'stable', 'creative'], s: 'Русский язык, профильный предмет, обществознание', w: 'ЛГПУ им. П. П. Семёнова-Тян-Шанского', ai: 'ИИ проверяет рутину и готовит задания, наставничество остаётся за учителем.' },
+  { n: 'Психолог', h: 'SI', k: 'H', a: { r: .7, l: .6 }, v: ['help', 'free'], s: 'Биология, обществознание', w: 'ЛГПУ им. П. П. Семёнова-Тян-Шанского', ai: 'Чат-боты не заменяют живой разговор, психолог учит пользоваться ими безопасно.' },
+  { n: 'Социальный работник', h: 'SC', k: 'H', a: { r: .6, l: .4 }, v: ['help', 'stable', 'team'], s: 'Обществознание', w: 'ЛГПУ; колледжи Липецка', ai: 'Цифровые сервисы ускоряют помощь, но поддержку людям оказывает человек.' },
+  { n: 'Юрист', h: 'EC', k: 'H', a: { r: .9, l: .8 }, v: ['money', 'career', 'fame'], s: 'Обществознание, история, русский язык', w: 'ВГУ (Воронеж); вузы Липецка с юридическими программами', ai: 'ИИ ищет судебную практику, юрист выстраивает позицию и защищает клиента.' },
+  { n: 'Историк, архивист, музейщик', h: 'IA', k: 'Z', a: { r: .8, l: .7 }, v: ['creative', 'stable'], s: 'История, обществознание (профиль «История» в школе № 23)', w: 'ЛГПУ им. П. П. Семёнова-Тян-Шанского; ВГУ (Воронеж)', ai: 'ИИ распознаёт старые документы, проверка источников остаётся за историком.' },
+  { n: 'Журналист, редактор', h: 'AE', k: 'X', a: { r: .9, l: .6 }, v: ['creative', 'fame', 'free'], s: 'Литература, русский язык, творческий конкурс', w: 'ВГУ (Воронеж)', ai: 'ИИ пишет черновики, ценятся проверка фактов и собственный взгляд.' },
+  { n: 'Переводчик, лингвист', h: 'AI', k: 'Z', a: { r: .9, l: .7 }, v: ['creative', 'free'], s: 'Иностранный язык, русский язык', w: 'ЛГПУ; ВГУ (Воронеж)', ai: 'Машинный перевод берёт простые тексты, человек — точный, художественный и устный.' },
+  { n: 'Графический и UX-дизайнер', h: 'AE', k: 'X', a: { l: .5, r: .4 }, v: ['creative', 'free', 'money'], s: 'Литература или информатика, творческое испытание', w: 'Колледжи и вузы Липецка и Воронежа с дизайнерскими программами', ai: 'ИИ генерирует картинки, дизайнер отвечает за идею, вкус и удобство.' },
+  { n: 'Видеограф, режиссёр монтажа', h: 'AE', k: 'X', a: { l: .4, r: .5 }, v: ['creative', 'fame', 'free'], s: 'Творческие испытания', w: 'Колледжи искусств; вузы Москвы и Воронежа', ai: 'ИИ ускоряет монтаж и цветокоррекцию, сюжет придумывает человек.' },
+  { n: 'Актёр, музыкант', h: 'AS', k: 'X', a: { r: .6 }, v: ['creative', 'fame', 'free'], s: 'Творческие испытания', w: 'Липецкий колледж искусств им. К. Н. Игумнова; ГИТИС', ai: 'Живое выступление ИИ не заменит, но он помогает с аранжировками.' },
+  { n: 'Повар, технолог питания', h: 'RA', k: 'X', a: { m: .4 }, v: ['creative', 'team'], s: 'После 9 класса — колледж', w: 'Колледжи Липецка', ai: 'ИИ рассчитывает меню и закупки, вкус и подача остаются за поваром.' },
+  { n: 'Экономист, бухгалтер', h: 'CE', k: 'Z', a: { m: .8, l: .6 }, v: ['stable', 'money'], s: 'Математика, обществознание', w: 'Липецкий филиал Финансового университета; ЛГТУ', ai: 'ИИ разносит документы и считает, специалист анализирует и проверяет.' },
+  { n: 'Финансовый аналитик', h: 'CI', k: 'Z', a: { m: .9, l: .8 }, v: ['money', 'career'], s: 'Математика, обществознание или информатика', w: 'Липецкий филиал Финансового университета', ai: 'ИИ строит прогнозы, аналитик понимает, когда им можно верить.' },
+  { n: 'Логист', h: 'CE', k: 'Z', a: { m: .7, l: .7 }, v: ['money', 'career', 'team'], s: 'Математика, обществознание', w: 'ЛГТУ; колледжи Липецка. В области работает ОЭЗ «Липецк»', ai: 'ИИ прокладывает маршруты, логист решает нештатные ситуации.' },
+  { n: 'Менеджер, предприниматель', h: 'EC', k: 'H', a: { l: .6, r: .6, m: .5 }, v: ['money', 'free', 'career'], s: 'Математика, обществознание', w: 'Липецкий филиал Финансового университета; ЛГТУ', ai: 'ИИ — помощник в аналитике и рекламе, решения и ответственность за людьми.' },
+  { n: 'Маркетолог', h: 'EA', k: 'H', a: { r: .7, l: .6 }, v: ['creative', 'career', 'team'], s: 'Обществознание, математика', w: 'Липецкий филиал Финансового университета; вузы Воронежа', ai: 'ИИ пишет тексты и анализирует аудиторию, маркетолог придумывает стратегию.' },
+  { n: 'Спасатель МЧС, пожарный', h: 'RS', k: 'H', a: { l: .5, m: .4 }, v: ['help', 'team', 'stable'], s: 'Физическая подготовка, математика, физика', w: 'Академия ГПС МЧС России (туда поступают выпускники школы № 23)', ai: 'Дроны и роботы помогают в разведке, спасает людей человек.' },
+  { n: 'Офицер', h: 'RE', k: 'T', a: { l: .6, m: .6 }, v: ['stable', 'career', 'team'], s: 'Математика, физика, физическая подготовка', w: 'ВУНЦ ВВС «ВВА им. Жуковского и Гагарина» (Воронеж; туда поступают выпускники школы № 23)', ai: 'Военная техника становится умнее, растёт значение подготовки и ответственности.' }
+];
+
+/* tests registry */
+const TESTS = [
+  { id: 'holland', group: 'psy', title: 'Тип профессиональных интересов', d: 'Методика Холланда: шесть типов — практик, исследователь, творец, помощник, лидер, организатор.', n: HQ.length, min: 7 },
+  { id: 'klimov', group: 'psy', title: 'Сфера труда', d: 'Выбирай из двух занятий то, что больше нравится. Определяет одну из пяти сфер по Климову.', n: KQ.length, min: 5, minGrade: 6 },
+  { id: 'soft', group: 'psy', title: 'Мягкие навыки', d: 'Общение, команда, лидерство, креативность, критическое мышление, самоорганизация.', n: SQ.length, min: 5 },
+  { id: 'values', group: 'psy', title: 'Что для меня важно в работе', d: 'Выбери три главные ценности. Они помогают отобрать профессии.', n: 1, min: 1 },
+  { id: 'logic', group: 'know', title: 'Логическое мышление', d: 'Ряды, выводы, аналогии. Задания под твой класс.', n: 8, min: 8 },
+  { id: 'rus', group: 'know', title: 'Русский язык', d: 'Орфография, пунктуация, нормы. Уровень твоего класса.', n: 8, min: 7 },
+  { id: 'math', group: 'know', title: 'Математика', d: 'Вычисления и задачи по программе твоего класса.', n: 8, min: 8 }
+];
+
+/* ================= STATE ================= */
+let grade = 9;
+let results = {};   // per test: {score..., at, grade}
+let db = null, userNs = null, me = null, isEditor = false, sample = null, downloads = null;
+let profileDoc = null;
+const LS = 'profnav23';
+function loadLocal() { try { const s = JSON.parse(localStorage.getItem(LS) || '{}'); if (s.grade) grade = s.grade; if (s.results) results = s.results; } catch (e) {} }
+function saveLocal() { try { localStorage.setItem(LS, JSON.stringify({ grade, results })); } catch (e) {} }
+async function persist() {
+  saveLocal();
+  if (!db || !me) return;
+  try {
+    let token = profileDoc && profileDoc.token;
+    if (!token) token = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^a-zA-Z0-9-]/g, '');
+    profileDoc = { grade, results, token, updatedAt: Date.now() };
+    await db.collection('data/users/' + me).doc('profile').set(profileDoc);
+    const h = results.holland, ab = abilities();
+    const stat = { grade, updatedAt: Date.now(), done: Object.keys(results).length };
+    if (h) stat.top = hollandCode(h.scores).slice(0, 1), stat.code = hollandCode(h.scores);
+    if (results.klimov) stat.sphere = topKey(results.klimov.scores);
+    ['l', 'r', 'm'].forEach(k => { if (ab[k] != null) stat[k] = ab[k]; });
+    await db.collection('stats').doc(me).set(stat);
+  } catch (e) { /* stays saved in this browser */ }
+}
+
+/* ================= HELPERS ================= */
+const topKey = obj => Object.keys(obj).sort((a, b) => obj[b] - obj[a])[0];
+function hollandCode(sc) { return HORDER.slice().sort((a, b) => sc[b] - sc[a]).slice(0, 3).join(''); }
+const RU_LETTER = { R: 'Р', I: 'И', A: 'А', S: 'С', E: 'П', C: 'К' };
+function abilities() { const o = {}; if (results.logic) o.l = results.logic.pct; if (results.rus) o.r = results.rus.pct; if (results.math) o.m = results.math.pct; return o; }
+function availableTests() { return TESTS.filter(t => !t.minGrade || grade >= t.minGrade); }
+function shuffleSeed(arr) { return arr; }
+
+/* ================= CLASS PICKER ================= */
+function renderClassPick() {
+  const box = $('classpick'); box.textContent = '';
+  for (let g = 5; g <= 11; g++) {
+    const b = el('button', null, String(g)); b.type = 'button'; b.setAttribute('aria-pressed', String(g === grade)); b.setAttribute('aria-label', g + ' класс');
+    b.onclick = () => { grade = g; persist(); renderAll(); };
+    box.appendChild(b);
+  }
+}
+
+/* ================= TABS ================= */
+const tabs = [...document.querySelectorAll('[data-tab]')];
+const panels = [...document.querySelectorAll('[data-panel]')];
+function show(name) {
+  const t = tabs.find(x => x.dataset.tab === name && !x.hidden);
+  if (!t) name = 'testy';
+  tabs.forEach(x => x.setAttribute('aria-selected', String(x.dataset.tab === name)));
+  panels.forEach(p => { p.hidden = p.dataset.panel !== name; });
+  if (name === 'profil') renderProfile();
+  if (name === 'professii') renderProfs();
+  if (name === 'pedagog') renderTeacher();
+}
+tabs.forEach(t => t.addEventListener('click', () => { show(t.dataset.tab); try { history.replaceState(null, '', '#' + t.dataset.tab); } catch (e) {} }));
+$('toProfile').onclick = () => show('profil');
+
+/* ================= TEST LIST ================= */
+function renderTests() {
+  $('classLabel').textContent = 'Тесты для ' + grade + ' класса · задания уровня «' + BAND_NAME[BAND_OF[grade]] + '»';
+  const list = availableTests();
+  const done = list.filter(t => results[t.id]).length;
+  $('progLabel').textContent = 'Пройдено ' + done + ' из ' + list.length;
+  $('progBar').style.width = (done / list.length * 100) + '%';
+  const box = $('testGroups'); box.textContent = '';
+  [['psy', 'Интересы и характер'], ['know', 'Способности']].forEach(([g, title]) => {
+    box.appendChild(el('div', 'grouptitle', title));
+    const grid = el('div', 'tcards');
+    list.filter(t => t.group === g).forEach(t => {
+      const c = el('button', 'tcard'); c.type = 'button';
+      c.appendChild(el('h3', null, t.title));
+      c.appendChild(el('p', null, t.d));
+      const m = el('div', 'meta');
+      m.appendChild(el('span', null, (t.id === 'values' ? '10 вариантов' : t.n + ' вопросов') + ' · ~' + t.min + ' мин'));
+      const r = results[t.id];
+      if (r) m.appendChild(el('span', 'badge done', r.pct != null ? r.pct + ' %' : 'пройден'));
+      else m.appendChild(el('span', 'badge new', 'не пройден'));
+      c.appendChild(m);
+      c.onclick = () => startTest(t.id);
+      grid.appendChild(c);
+    });
+    box.appendChild(grid);
+  });
+}
+
+/* ================= RUNNER ================= */
+function openRunner() { $('testsHome').hidden = true; const r = $('runnerBox'); r.hidden = false; r.textContent = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); return r; }
+function closeRunner() { $('runnerBox').hidden = true; $('testsHome').hidden = false; renderTests(); }
+function frame(title, idx, total) {
+  const box = el('div', 'runner');
+  const top = el('div', 'top');
+  top.appendChild(el('span', 'label', title + (total ? ' · ' + (idx + 1) + ' из ' + total : '')));
+  const x = el('button', 'btn ghost', 'Выйти'); x.type = 'button'; x.onclick = closeRunner; top.appendChild(x);
+  box.appendChild(top);
+  if (total) { const s = el('div', 'steps'); for (let i = 0; i < total; i++) { const b = el('i'); if (i <= idx) b.className = 'on'; s.appendChild(b); } box.appendChild(s); }
+  return box;
+}
+function startTest(id) {
+  if (id === 'holland') return runScale('Тип интересов', HQ, ans => {
+    const sc = {}; HORDER.forEach(k => sc[k] = 0);
+    HQ.forEach(([k], i) => sc[k] += ans[i]);
+    HORDER.forEach(k => sc[k] = Math.round(sc[k] / 20 * 100));
+    finishPsy('holland', { scores: sc });
+  });
+  if (id === 'soft') return runScale('Мягкие навыки', SQ, ans => {
+    const sc = {}; SORDER.forEach(k => sc[k] = 0);
+    SQ.forEach(([k], i) => sc[k] += ans[i]);
+    SORDER.forEach(k => sc[k] = Math.round(sc[k] / 12 * 100));
+    finishPsy('soft', { scores: sc });
+  });
+  if (id === 'klimov') return runPairs();
+  if (id === 'values') return runValues();
+  return runKnow(id);
+}
+function runScale(title, items, done) {
+  const ans = new Array(items.length).fill(null); let i = 0;
+  const r = openRunner();
+  const draw = () => {
+    r.textContent = '';
+    const box = frame(title, i, items.length);
+    box.appendChild(el('h3', 'q', items[i][1]));
+    const sc = el('div', 'scale');
+    SCALE5.forEach((t, v) => {
+      const b = el('button', null, t); b.type = 'button'; b.setAttribute('aria-pressed', String(ans[i] === v));
+      b.onclick = () => { ans[i] = v; if (i < items.length - 1) { i++; draw(); } else done(ans); };
+      sc.appendChild(b);
+    });
+    box.appendChild(sc);
+    if (i > 0) { const back = el('button', 'btn ghost', '← Назад'); back.type = 'button'; back.onclick = () => { i--; draw(); }; const rb = el('div', 'row-btns'); rb.appendChild(back); box.appendChild(rb); }
+    r.appendChild(box);
+  };
+  draw();
+}
+function runPairs() {
+  const ans = new Array(KQ.length).fill(null); let i = 0;
+  const r = openRunner();
+  const draw = () => {
+    r.textContent = '';
+    const box = frame('Сфера труда', i, KQ.length);
+    box.appendChild(el('h3', 'q', 'Что тебе больше нравится?'));
+    const p = el('div', 'pair');
+    const q = KQ[i];
+    [[q[0], q[1]], [q[2], q[3]]].forEach(([k, t]) => {
+      const b = el('button', null, t); b.type = 'button';
+      b.onclick = () => { ans[i] = k; if (i < KQ.length - 1) { i++; draw(); } else {
+        const sc = {}; KORDER.forEach(x => sc[x] = 0); ans.forEach(x => sc[x]++);
+        KORDER.forEach(x => sc[x] = Math.round(sc[x] / 8 * 100));
+        finishPsy('klimov', { scores: sc });
+      } };
+      p.appendChild(b);
+    });
+    box.appendChild(p);
+    if (i > 0) { const back = el('button', 'btn ghost', '← Назад'); back.type = 'button'; back.onclick = () => { i--; draw(); }; const rb = el('div', 'row-btns'); rb.appendChild(back); box.appendChild(rb); }
+    r.appendChild(box);
+  };
+  draw();
+}
+function runValues() {
+  const r = openRunner();
+  const picked = new Set(results.values ? results.values.picked : []);
+  const box = frame('Ценности');
+  box.appendChild(el('h3', 'q', 'Выбери три вещи, которые для тебя важнее всего в будущей работе'));
+  const ch = el('div', 'chips');
+  const go = el('button', 'btn', 'Сохранить выбор'); go.type = 'button';
+  const upd = () => { go.disabled = picked.size === 0; go.textContent = picked.size ? 'Сохранить выбор (' + picked.size + ' из 3)' : 'Выбери хотя бы одну'; };
+  Object.keys(VALUES).forEach(k => {
+    const b = el('button', 'chip', VALUES[k]); b.type = 'button'; b.setAttribute('aria-pressed', String(picked.has(k)));
+    b.onclick = () => { if (picked.has(k)) picked.delete(k); else if (picked.size < 3) picked.add(k); b.setAttribute('aria-pressed', String(picked.has(k))); upd(); };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+  go.onclick = () => finishPsy('values', { picked: [...picked] });
+  const rb = el('div', 'row-btns'); rb.appendChild(go); box.appendChild(rb); upd();
+  r.appendChild(box);
+}
+function finishPsy(id, data) {
+  results[id] = Object.assign({ at: Date.now(), grade }, data);
+  persist();
+  const r = $('runnerBox'); r.textContent = '';
+  const box = frame('Готово');
+  const t = TESTS.find(x => x.id === id);
+  box.appendChild(el('h3', 'q', 'Тест «' + t.title + '» пройден'));
+  if (id === 'holland') {
+    const code = hollandCode(data.scores);
+    box.appendChild(el('p', null, 'Твой код интересов: ' + code.split('').map(c => RU_LETTER[c]).join('') + '. Ведущий тип — «' + HOLLAND[code[0]].name + '». ' + HOLLAND[code[0]].d));
+    box.appendChild(chartWrap(radar(HORDER.map(k => HOLLAND[k].name), HORDER.map(k => data.scores[k]), 'Типы интересов')));
+  } else if (id === 'soft') {
+    box.appendChild(chartWrap(radar(SORDER.map(k => SOFT[k]), SORDER.map(k => data.scores[k]), 'Мягкие навыки')));
+  } else if (id === 'klimov') {
+    const k = topKey(data.scores);
+    box.appendChild(el('p', null, 'Тебе ближе сфера «' + KLIMOV[k] + '». ' + KDESC[k]));
+    box.appendChild(chartWrap(radar(KORDER.map(x => KSHORT[x]), KORDER.map(x => data.scores[x]), 'Сферы труда')));
+  } else if (id === 'values') {
+    box.appendChild(el('p', null, 'Твои ценности: ' + data.picked.map(k => VALUES[k]).join(', ') + '.'));
+  }
+  const rb = el('div', 'row-btns');
+  const a = el('button', 'btn', 'К списку тестов'); a.type = 'button'; a.onclick = closeRunner;
+  const b = el('button', 'btn ghost', 'Мой профиль'); b.type = 'button'; b.onclick = () => { closeRunner(); show('profil'); };
+  rb.append(a, b); box.appendChild(rb);
+  r.appendChild(box);
+}
+function runKnow(id) {
+  const T = KNOW[id], band = BAND_OF[grade], items = T.bands[band];
+  const ans = new Array(items.length).fill(null); let i = 0;
+  const r = openRunner();
+  const draw = () => {
+    r.textContent = '';
+    const box = frame(T.title + ' · ' + BAND_NAME[band], i, items.length);
+    box.appendChild(el('h3', 'q', items[i][0]));
+    const o = el('div', 'opts');
+    items[i][1].forEach((t, v) => {
+      const b = el('button', null, t); b.type = 'button'; b.setAttribute('aria-pressed', String(ans[i] === v));
+      b.onclick = () => { ans[i] = v; if (i < items.length - 1) { i++; draw(); } else finishKnow(id, items, ans, band); };
+      o.appendChild(b);
+    });
+    box.appendChild(o);
+    if (i > 0) { const back = el('button', 'btn ghost', '← Назад'); back.type = 'button'; back.onclick = () => { i--; draw(); }; const rb = el('div', 'row-btns'); rb.appendChild(back); box.appendChild(rb); }
+    r.appendChild(box);
+  };
+  draw();
+}
+function finishKnow(id, items, ans, band) {
+  const correct = items.reduce((s, q, i) => s + (ans[i] === q[2] ? 1 : 0), 0);
+  const pct = Math.round(correct / items.length * 100);
+  results[id] = { pct, correct, total: items.length, band, grade, at: Date.now() };
+  persist();
+  const r = $('runnerBox'); r.textContent = '';
+  const box = frame(KNOW[id].title);
+  const res = el('div'); res.appendChild(el('div', 'big', correct + ' из ' + items.length));
+  res.appendChild(el('p', null, pct >= 85 ? 'Отличный результат: это твоя сильная сторона.' : pct >= 60 ? 'Хороший уровень. Посмотри разбор ошибок ниже.' : 'Есть над чем поработать. Разбор поможет понять, что повторить.'));
+  box.appendChild(res);
+  const rv = el('div', 'review');
+  items.forEach((q, i) => {
+    const ok = ans[i] === q[2];
+    const d = el('div', ok ? '' : 'no');
+    d.appendChild(el('b', null, (i + 1) + '. ' + q[0]));
+    d.appendChild(el('span', null, (ok ? 'Верно. ' : 'Твой ответ: ' + q[1][ans[i]] + '. Правильно: ' + q[1][q[2]] + '. ') + q[3]));
+    rv.appendChild(d);
+  });
+  box.appendChild(rv);
+  const rb = el('div', 'row-btns');
+  const a = el('button', 'btn', 'К списку тестов'); a.type = 'button'; a.onclick = closeRunner;
+  const b = el('button', 'btn ghost', 'Пройти заново'); b.type = 'button'; b.onclick = () => runKnow(id);
+  rb.append(a, b); box.appendChild(rb);
+  r.appendChild(box);
+}
+
+/* ================= CHARTS ================= */
+const NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+function radar(labels, values, title) {
+  const n = labels.length, W = 420, H = 380, cx = W / 2, cy = H / 2 + 4, R = 120;
+  const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': title + ': ' + labels.map((l, i) => l + ' ' + values[i] + '%').join(', ') });
+  const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+  [25, 50, 75, 100].forEach(p => {
+    const pts = labels.map((_, i) => pt(i, R * p / 100).join(',')).join(' ');
+    svg.appendChild(svgEl('polygon', { points: pts, fill: 'none', stroke: 'var(--grid)', 'stroke-width': 1 }));
+  });
+  labels.forEach((_, i) => { const [x, y] = pt(i, R); svg.appendChild(svgEl('line', { x1: cx, y1: cy, x2: x, y2: y, stroke: 'var(--grid)', 'stroke-width': 1 })); });
+  [50, 100].forEach(p => { const [x, y] = pt(0, R * p / 100); svg.appendChild(svgEl('text', { x: x + 5, y: y + 4, 'font-size': 10, fill: 'var(--muted)', 'font-family': 'PT Mono, monospace' }, p)); });
+  const shape = values.map((v, i) => pt(i, R * Math.max(v, 2) / 100).join(',')).join(' ');
+  svg.appendChild(svgEl('polygon', { points: shape, fill: 'var(--accent)', 'fill-opacity': .18, stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+  const maxV = Math.max(...values);
+  values.forEach((v, i) => {
+    const [x, y] = pt(i, R * Math.max(v, 2) / 100);
+    const g = svgEl('g', {});
+    g.appendChild(svgEl('circle', { cx: x, cy: y, r: 12, fill: 'transparent' }));
+    g.appendChild(svgEl('circle', { cx: x, cy: y, r: 5, fill: 'var(--accent)', stroke: 'var(--surface)', 'stroke-width': 2 }));
+    g.appendChild(svgEl('title', {}, labels[i] + ': ' + v + '%'));
+    svg.appendChild(g);
+    const [lx, ly] = pt(i, R + 26);
+    const anchor = Math.abs(lx - cx) < 8 ? 'middle' : (lx > cx ? 'start' : 'end');
+    const words = labels[i].split(' ');
+    const lines = words.length > 1 && labels[i].length > 12 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [labels[i]];
+    const t = svgEl('text', { x: lx, y: ly - (lines.length - 1) * 7 + (ly > cy + 10 ? 8 : 0), 'text-anchor': anchor, 'font-size': 13, fill: 'var(--ink)', 'font-family': 'PT Sans, sans-serif', 'font-weight': v === maxV ? 700 : 400 });
+    lines.forEach((ln, j) => t.appendChild(svgEl('tspan', { x: lx, dy: j ? 15 : 0 }, ln)));
+    t.appendChild(svgEl('tspan', { x: lx, dy: 15, fill: 'var(--muted)', 'font-family': 'PT Mono, monospace', 'font-size': 12, 'font-weight': 400 }, v + '%'));
+    svg.appendChild(t);
+  });
+  return svg;
+}
+function chartWrap(svg) { const d = el('div', 'chart'); d.appendChild(svg); return d; }
+function hbars(rows) {
+  const box = el('div', 'hbars');
+  rows.forEach(([name, v]) => {
+    const r = el('div', 'hbar' + (v == null ? ' na' : ''));
+    r.appendChild(el('span', null, name));
+    const tr = el('div', 'track'); const i = el('i'); i.style.width = (v || 0) + '%'; tr.appendChild(i);
+    tr.title = name + ': ' + (v == null ? 'тест не пройден' : v + '%');
+    r.appendChild(tr);
+    r.appendChild(el('b', null, v == null ? '—' : v + '%'));
+    box.appendChild(r);
+  });
+  return box;
+}
+
+/* ================= MATCHING ================= */
+function profMatch(p) {
+  let parts = [];
+  if (results.holland) {
+    const s = results.holland.scores;
+    const h = (s[p.h[0]] * 1 + (p.h[1] ? s[p.h[1]] * .6 : 0)) / (p.h[1] ? 1.6 : 1);
+    parts.push([h, .4]);
+  }
+  if (results.klimov) parts.push([results.klimov.scores[p.k], .2]);
+  const ab = abilities(); let ws = 0, sum = 0;
+  for (const k in p.a) if (ab[k] != null) { ws += p.a[k]; sum += p.a[k] * ab[k]; }
+  if (ws > 0) parts.push([sum / ws, .25]);
+  if (results.values && results.values.picked.length) {
+    const hit = p.v.filter(v => results.values.picked.includes(v)).length;
+    parts.push([Math.min(100, hit / Math.min(3, results.values.picked.length) * 100 * 1.2), .15]);
+  }
+  if (!parts.length) return null;
+  const tw = parts.reduce((s, x) => s + x[1], 0);
+  return Math.round(parts.reduce((s, x) => s + x[0] * x[1], 0) / tw);
+}
+function ranked() { return PROF.map(p => ({ p, m: profMatch(p) })).filter(x => x.m != null).sort((a, b) => b.m - a.m); }
+
+/* class-specific advice */
+function classAdvice() {
+  const h = results.holland ? hollandCode(results.holland.scores)[0] : null;
+  const ab = abilities();
+  const top = ranked().slice(0, 3).map(x => x.p);
+  const L = [];
+  const CLUBS = { R: 'технический кружок, робототехника, спортивная секция', I: 'олимпиадные кружки, научное общество, программирование', A: 'театральная студия «Овация», хор, изостудия, школьные медиа', S: 'волонтёрство, вожатство, Движение первых', E: 'ученическое самоуправление, организация мероприятий, дебаты', C: 'кружок финансовой грамотности, помощь в школьной библиотеке, шахматы' };
+  let title;
+  if (grade <= 6) {
+    title = 'Совет для ' + grade + ' класса: пробуй разное';
+    L.push('Профессию выбирать рано. Главное сейчас — понять, что тебе по-настоящему интересно.');
+    if (h) L.push('Тебе подойдут: ' + CLUBS[h] + '.');
+    L.push('Пройди тесты ещё раз через год: интересы в этом возрасте быстро меняются.');
+  } else if (grade <= 8) {
+    title = 'Совет для ' + grade + ' класса: присмотрись к профилю';
+    L.push('В 9 классе ты выбираешь экзамены ОГЭ, а после — профиль 10 класса или колледж. Начни пробовать уже сейчас.');
+    if (h) L.push('Попробуй: ' + CLUBS[h] + '.');
+    const prof = schoolProfile(ab);
+    if (prof) L.push('По результатам тестов тебе может подойти профиль «' + prof + '» в нашей школе.');
+  } else if (grade === 9) {
+    title = 'Совет для 9 класса: ОГЭ и что дальше';
+    const prof = schoolProfile(ab);
+    if (prof) L.push('Если остаёшься в школе, присмотрись к профилю «' + prof + '».');
+    if (top.length) L.push('Для профессий из твоего списка важны предметы: ' + uniqSubjects(top) + '. Подумай о них при выборе ОГЭ.');
+    L.push('Для рабочих профессий (оператор ЧПУ, электромонтажник, медсестра) можно поступать в колледж после 9 класса, в том числе по программе «Профессионалитет».');
+  } else {
+    title = 'Совет для ' + grade + ' класса: ЕГЭ и вуз';
+    if (top.length) L.push('Для твоих профессий важны предметы: ' + uniqSubjects(top) + '. Сверь их со списком ЕГЭ на сайтах вузов.');
+    L.push('Сходи на дни открытых дверей ЛГТУ, ЛГПУ, Липецкого филиала Финансового университета или вузов Воронежа.');
+    L.push('Пройди профессиональную пробу: поговори с человеком этой профессии или проведи с ним день.');
+  }
+  return { title, L };
+}
+function schoolProfile(ab) {
+  const opts = [];
+  const h = results.holland ? results.holland.scores : null;
+  if (ab.m != null || ab.l != null) opts.push(['Математика', ((ab.m || 0) + (ab.l || 0)) / ((ab.m != null) + (ab.l != null)) + (h ? (h.I + h.C + h.R) / 30 : 0)]);
+  if (ab.r != null) opts.push(['Русский язык', ab.r + (h ? (h.A + h.S) / 20 : 0)]);
+  if (ab.r != null || h) opts.push(['История', (ab.r != null ? ab.r * .8 : 50) + (h ? (h.S + h.E + h.I) / 30 : 0)]);
+  if (!opts.length) return null;
+  return opts.sort((a, b) => b[1] - a[1])[0][0];
+}
+function uniqSubjects(list) {
+  const known = ['Математика', 'Физика', 'Химия', 'Биология', 'Информатика', 'Русский язык', 'Обществознание', 'История', 'Литература', 'География', 'Иностранный язык'];
+  const set = new Set();
+  list.forEach(p => known.forEach(k => { if (p.s.toLowerCase().includes(k.toLowerCase())) set.add(k); }));
+  return set.size ? [...set].join(', ') : 'смотри в карточках профессий';
+}
+
+/* ================= PROFILE ================= */
+function renderProfile() {
+  $('profLabel').textContent = 'Профиль ученика · ' + grade + ' класс';
+  const box = $('profileBody'); box.textContent = '';
+  const n = Object.keys(results).length;
+  if (!n) {
+    const e = el('div', 'emptybox'); e.appendChild(el('strong', null, 'Профиль пока пуст'));
+    e.appendChild(document.createTextNode('Пройди хотя бы один тест, и здесь появятся диаграммы. Начни с теста «Тип профессиональных интересов»: по нему строится шестиугольник Холланда.'));
+    const b = el('button', 'btn', 'Начать тест'); b.type = 'button'; b.style.marginTop = '14px'; b.onclick = () => { show('testy'); startTest('holland'); };
+    e.appendChild(el('br')); e.appendChild(b);
+    box.appendChild(e); return;
+  }
+  const dash = el('div', 'dash');
+
+  const p1 = el('div', 'panel'); p1.appendChild(el('h3', null, 'Шестиугольник интересов'));
+  if (results.holland) {
+    const sc = results.holland.scores, code = hollandCode(sc);
+    p1.appendChild(el('p', 'sub', 'Методика Холланда. Чем дальше точка от центра, тем сильнее интерес.'));
+    p1.appendChild(chartWrap(radar(HORDER.map(k => HOLLAND[k].name), HORDER.map(k => sc[k]), 'Типы интересов')));
+    const c = el('div', 'code'); c.appendChild(el('b', null, code.split('').map(x => RU_LETTER[x]).join(''))); c.appendChild(el('span', null, code.split('').map(x => HOLLAND[x].name).join(' · '))); p1.appendChild(c);
+    p1.appendChild(el('p', null, HOLLAND[code[0]].d));
+  } else p1.appendChild(missing('holland'));
+  dash.appendChild(p1);
+
+  const p2 = el('div', 'panel'); p2.appendChild(el('h3', null, 'Мягкие навыки'));
+  if (results.soft) {
+    const sc = results.soft.scores;
+    p2.appendChild(el('p', 'sub', 'Самооценка. Сильные стороны используй, слабые можно развивать.'));
+    p2.appendChild(chartWrap(radar(SORDER.map(k => SOFT[k]), SORDER.map(k => sc[k]), 'Мягкие навыки')));
+    const best = topKey(sc), worst = SORDER.slice().sort((a, b) => sc[a] - sc[b])[0];
+    p2.appendChild(el('p', null, 'Сильнее всего: ' + SOFT[best].toLowerCase() + '. Стоит развивать: ' + SOFT[worst].toLowerCase() + '.'));
+  } else p2.appendChild(missing('soft'));
+  dash.appendChild(p2);
+
+  const p3 = el('div', 'panel'); p3.appendChild(el('h3', null, 'Сферы труда'));
+  if (results.klimov) {
+    const sc = results.klimov.scores, k = topKey(sc);
+    p3.appendChild(el('p', 'sub', 'Классификация Е. А. Климова: с чем тебе интереснее работать.'));
+    p3.appendChild(chartWrap(radar(KORDER.map(x => KSHORT[x]), KORDER.map(x => sc[x]), 'Сферы труда')));
+    p3.appendChild(el('p', null, KLIMOV[k] + '. ' + KDESC[k]));
+  } else if (grade < 6) p3.appendChild(el('p', 'sub', 'Этот тест открывается с 6 класса.'));
+  else p3.appendChild(missing('klimov'));
+  dash.appendChild(p3);
+
+  const p4 = el('div', 'panel'); p4.appendChild(el('h3', null, 'Способности'));
+  p4.appendChild(el('p', 'sub', 'Доля верных ответов в заданиях уровня твоего класса.'));
+  const ab = abilities();
+  p4.appendChild(hbars([['Логика', ab.l], ['Русский язык', ab.r], ['Математика', ab.m]]));
+  if (results.values) p4.appendChild(el('p', null, 'Ценности: ' + results.values.picked.map(k => VALUES[k]).join(', ') + '.'));
+  else p4.appendChild(missing('values'));
+  dash.appendChild(p4);
+
+  const p5 = el('div', 'panel wide'); p5.appendChild(el('h3', null, 'Подходящие профессии'));
+  const rk = ranked().slice(0, 6);
+  if (rk.length) {
+    p5.appendChild(el('p', 'sub', 'Совпадение считается по интересам, сфере труда, способностям и ценностям. Полный список — во вкладке «Профессии».'));
+    p5.appendChild(hbars(rk.map(x => [x.p.n, x.m])));
+  }
+  const adv = classAdvice();
+  const g = el('div', 'guide-box'); g.appendChild(el('h4', null, adv.title));
+  const ul = el('ul'); adv.L.forEach(t => ul.appendChild(el('li', null, t))); g.appendChild(ul);
+  p5.appendChild(g);
+  dash.appendChild(p5);
+
+  const p6 = el('div', 'panel wide'); p6.appendChild(el('h3', null, 'Заключение ИИ-профконсультанта'));
+  p6.appendChild(el('p', 'sub', 'ИИ соберёт результаты всех тестов в понятный разбор с советами для твоего класса.'));
+  const out = el('div', 'ai-out'); out.textContent = 'Нажми кнопку, чтобы получить заключение.';
+  const rb = el('div', 'row-btns');
+  const go = el('button', 'btn', 'Получить заключение'); go.type = 'button';
+  go.onclick = () => aiConclusion(out, go);
+  rb.appendChild(go);
+  const dl = el('button', 'btn ghost', 'Скачать результаты'); dl.type = 'button'; dl.onclick = () => downloadReport(out.dataset.ai || ''); rb.appendChild(dl);
+  p6.appendChild(rb); p6.appendChild(out);
+  p6.appendChild(el('p', 'note', 'Это ориентир, а не приговор. Обсуди результаты с классным руководителем, школьным психологом и родителями.'));
+  dash.appendChild(p6);
+
+  box.appendChild(dash);
+}
+function missing(id) {
+  const d = el('div'); const t = TESTS.find(x => x.id === id);
+  d.appendChild(el('p', 'sub', 'Тест «' + t.title + '» ещё не пройден.'));
+  const b = el('button', 'btn ghost', 'Пройти тест'); b.type = 'button'; b.onclick = () => { show('testy'); startTest(id); };
+  d.appendChild(b); return d;
+}
+function summaryText() {
+  const L = ['Класс: ' + grade];
+  if (results.holland) L.push('Интересы по Холланду (0–100): ' + HORDER.map(k => HOLLAND[k].name + ' ' + results.holland.scores[k]).join(', ') + '. Код: ' + hollandCode(results.holland.scores).split('').map(x => HOLLAND[x].name).join('-'));
+  if (results.klimov) L.push('Сферы труда по Климову: ' + KORDER.map(k => KLIMOV[k] + ' ' + results.klimov.scores[k]).join(', '));
+  if (results.soft) L.push('Мягкие навыки: ' + SORDER.map(k => SOFT[k] + ' ' + results.soft.scores[k]).join(', '));
+  const ab = abilities();
+  if (Object.keys(ab).length) L.push('Тесты способностей (доля верных, уровень своего класса): ' + [ab.l != null && 'логика ' + ab.l + '%', ab.r != null && 'русский язык ' + ab.r + '%', ab.m != null && 'математика ' + ab.m + '%'].filter(Boolean).join(', '));
+  if (results.values) L.push('Ценности: ' + results.values.picked.map(k => VALUES[k]).join(', '));
+  const rk = ranked().slice(0, 6);
+  if (rk.length) L.push('Профессии с наибольшим совпадением: ' + rk.map(x => x.p.n + ' (' + x.m + '%; учиться: ' + x.p.w + '; предметы: ' + x.p.s + ')').join('; '));
+  return L.join('\n');
+}
+async function aiConclusion(out, btn) {
+  if (!sample) { out.textContent = 'ИИ-консультант работает, когда страница открыта на claude.ai под учётной записью.'; return; }
+  btn.disabled = true; out.textContent = 'Анализирую результаты…';
+  const prompt = 'Ты — школьный профконсультант проекта «Профнавигатор-23» (МАОУ СОШ № 23 г. Липецка, профильные направления школы: история, математика, русский язык). Напиши ученику заключение по-русски, обращаясь на «ты», тепло и конкретно, 180–260 слов, простыми абзацами без markdown-разметки (без звёздочек и решёток).\nСтруктура: 1) коротко, какой у него профиль и сильные стороны; 2) 3–4 профессии из списка ниже и почему они подходят; 3) практические шаги именно для его класса (5–6 класс — кружки и пробы; 7–8 — выбор профиля и предметов; 9 — ОГЭ, профиль 10 класса или колледж; 10–11 — ЕГЭ и вузы); 4) что можно развивать.\nОпирайся только на данные ниже, не выдумывай баллы, учебные заведения и правила приёма. Не ставь диагнозов, не категоричен: это ориентир. Если тестов мало, скажи, какие пройти ещё.\n\nДАННЫЕ:\n' + summaryText();
+  try {
+    const res = await sample(prompt, { cache: false, onText: ({ text }) => { out.textContent = text; } });
+    out.dataset.ai = res.text || out.textContent;
+  } catch (err) {
+    out.textContent = err && err.code === 'not_granted' ? 'ИИ-консультант недоступен: нужно разрешение на обращения к Claude.' : err && err.code === 'rate_limited' ? 'Слишком много запросов. Подожди минуту и попробуй снова.' : ((err && err.text) || 'Не получилось составить заключение. Попробуй ещё раз.');
+  } finally { btn.disabled = false; }
+}
+async function downloadReport(ai) {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const charts = [...document.querySelectorAll('#profileBody .chart svg')].map(s => { const c = s.cloneNode(true); c.setAttribute('width', 420); c.setAttribute('xmlns', NS); return c.outerHTML.replace(/var\(--accent\)/g, '#1d6b62').replace(/var\(--grid\)/g, '#c9d4d2').replace(/var\(--muted\)/g, '#5b6866').replace(/var\(--ink\)/g, '#17211f').replace(/var\(--surface\)/g, '#ffffff'); }).join('');
+  const html = '<!doctype html><meta charset="utf-8"><title>Профнавигатор-23 — результаты</title><body style="font-family:Arial,sans-serif;max-width:860px;margin:24px auto;padding:0 16px;color:#17211f"><h1>Профнавигатор-23</h1><p>МАОУ СОШ № 23 г. Липецка · дата: ' + new Date().toLocaleDateString('ru-RU') + '</p><div style="display:flex;flex-wrap:wrap;gap:12px">' + charts + '</div><h2>Результаты</h2><pre style="white-space:pre-wrap;font-family:inherit">' + esc(summaryText()) + '</pre>' + (ai ? '<h2>Заключение ИИ-профконсультанта</h2><p style="white-space:pre-wrap">' + esc(ai) + '</p>' : '') + '<p style="color:#5b6866">Результаты — ориентир для разговора с классным руководителем и родителями.</p></body>';
+  if (!downloads) { alertNote('Скачивание доступно, когда страница открыта на claude.ai.'); return; }
+  try { await downloads.save({ filename: 'profnavigator-' + grade + 'klass.html', data: new Blob([html], { type: 'text/html' }) }); }
+  catch (e) { /* viewer declined */ }
+}
+function alertNote(t) { const n = document.querySelector('#profileBody .note'); if (n) n.textContent = t; }
+
+/* ================= PROFESSIONS ================= */
+let pFilter = '', pSearch = '';
+(function initPF() {
+  const box = $('pfilters');
+  [['', 'Все']].concat(KORDER.map(k => [k, KSHORT[k]])).forEach(([k, t], i) => {
+    const b = el('button', 'chip', t); b.type = 'button'; b.dataset.k = k; b.setAttribute('aria-pressed', String(i === 0));
+    b.onclick = () => { pFilter = k; box.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === b))); renderProfs(); };
+    box.insertBefore(b, $('psearch'));
+  });
+  $('psearch').addEventListener('input', e => { pSearch = e.target.value.trim().toLowerCase(); renderProfs(); });
+})();
+function renderProfs() {
+  const box = $('plist'); box.textContent = '';
+  let list = PROF.map(p => ({ p, m: profMatch(p) }));
+  if (pFilter) list = list.filter(x => x.p.k === pFilter);
+  if (pSearch) list = list.filter(x => (x.p.n + ' ' + x.p.w).toLowerCase().includes(pSearch));
+  list.sort((a, b) => (b.m ?? -1) - (a.m ?? -1) || a.p.n.localeCompare(b.p.n, 'ru'));
+  if (!list.length) { box.appendChild(el('div', 'emptybox', 'Ничего не найдено. Измени запрос или фильтр.')); return; }
+  list.forEach(({ p, m }) => {
+    const c = el('article', 'prof');
+    const ph = el('div', 'ph'); ph.appendChild(el('h3', null, p.n));
+    if (m != null) ph.appendChild(el('span', 'match' + (m >= 70 ? ' hi' : ''), m + ' %'));
+    c.appendChild(ph);
+    const tg = el('div', 'tags'); tg.appendChild(el('span', 'tag', KSHORT[p.k])); p.h.split('').forEach(x => tg.appendChild(el('span', 'tag', HOLLAND[x].name))); c.appendChild(tg);
+    const dl = el('dl');
+    dl.appendChild(el('dt', null, 'Предметы')); dl.appendChild(el('dd', null, p.s));
+    dl.appendChild(el('dt', null, 'Где учиться')); dl.appendChild(el('dd', null, p.w));
+    dl.appendChild(el('dt', null, 'Ценности')); dl.appendChild(el('dd', null, p.v.map(v => VALUES[v]).join(', ')));
+    c.appendChild(dl);
+    c.appendChild(el('p', 'ai', p.ai));
+    box.appendChild(c);
+  });
+}
+
+/* ================= TEACHER ================= */
+let statsRows = [], statsUnsub = null;
+function renderTeacher() {
+  const box = $('teacherBody'); box.textContent = '';
+  if (!statsRows.length) { const e = el('div', 'emptybox'); e.appendChild(el('strong', null, 'Данных пока нет')); e.appendChild(document.createTextNode('Сводка появится, когда ученики начнут проходить тесты. Поделитесь ссылкой на страницу с классами.')); box.appendChild(e); return; }
+  const dash = el('div', 'dash');
+  const byGrade = {};
+  statsRows.forEach(r => { (byGrade[r.grade] = byGrade[r.grade] || []).push(r); });
+  const p1 = el('div', 'panel wide'); p1.appendChild(el('h3', null, 'Участники и средние баллы по классам'));
+  const tw = el('div', 'tablewrap'); const t = el('table');
+  const th = el('tr'); ['Класс', 'Учеников', 'Средн. тестов', 'Логика', 'Русский', 'Математика', 'Частый тип интересов'].forEach(x => th.appendChild(el('th', null, x))); t.appendChild(th);
+  Object.keys(byGrade).sort((a, b) => a - b).forEach(g => {
+    const rows = byGrade[g]; const avg = k => { const v = rows.filter(r => r[k] != null).map(r => r[k]); return v.length ? Math.round(v.reduce((s, x) => s + x, 0) / v.length) + ' %' : '—'; };
+    const tops = {}; rows.forEach(r => { if (r.top) tops[r.top] = (tops[r.top] || 0) + 1; });
+    const topT = Object.keys(tops).length ? HOLLAND[topKey(tops)].name : '—';
+    const tr = el('tr'); [g, rows.length, (rows.reduce((s, r) => s + (r.done || 0), 0) / rows.length).toFixed(1), avg('l'), avg('r'), avg('m'), topT].forEach(x => tr.appendChild(el('td', null, String(x)))); t.appendChild(tr);
+  });
+  tw.appendChild(t); p1.appendChild(tw); dash.appendChild(p1);
+  const p2 = el('div', 'panel'); p2.appendChild(el('h3', null, 'Типы интересов во всех классах'));
+  const cnt = {}; HORDER.forEach(k => cnt[k] = 0); let tot = 0; statsRows.forEach(r => { if (r.top) { cnt[r.top]++; tot++; } });
+  p2.appendChild(el('p', 'sub', 'Доля учеников с этим ведущим типом, n = ' + tot + '.'));
+  p2.appendChild(hbars(HORDER.map(k => [HOLLAND[k].name, tot ? Math.round(cnt[k] / tot * 100) : null])));
+  dash.appendChild(p2);
+  const p3 = el('div', 'panel'); p3.appendChild(el('h3', null, 'Сферы труда'));
+  const ks = {}; KORDER.forEach(k => ks[k] = 0); let kt = 0; statsRows.forEach(r => { if (r.sphere) { ks[r.sphere]++; kt++; } });
+  p3.appendChild(el('p', 'sub', 'Доля учеников, n = ' + kt + '.'));
+  p3.appendChild(hbars(KORDER.map(k => [KSHORT[k], kt ? Math.round(ks[k] / kt * 100) : null])));
+  dash.appendChild(p3);
+  box.appendChild(dash);
+}
+
+/* ================= BOOT ================= */
+function renderAll() { renderClassPick(); renderTests(); const cur = tabs.find(t => t.getAttribute('aria-selected') === 'true'); if (cur && cur.dataset.tab !== 'testy') show(cur.dataset.tab); }
+loadLocal();
+renderAll();
+show((location.hash || '').slice(1) || 'testy');
+
+(async () => {
+  const c = window.claude; if (!c || !c.use) return;
+  const [dbNs, uNs, sNs, dNs] = await Promise.all([c.use('db'), c.use('user'), c.use('sample'), c.use('downloads')]);
+  db = dbNs; userNs = uNs; sample = sNs; downloads = dNs;
+  if (userNs) {
+    try { me = await userNs.id(); } catch (e) {}
+    try { isEditor = await userNs.canEdit(); } catch (e) {}
+  }
+  if (isEditor) $('t-pedagog').hidden = false;
+  if (db && me) {
+    try {
+      const snap = await db.collection('data/users/' + me).doc('profile').get();
+      if (snap.exists) {
+        const d = snap.data() || {}; profileDoc = Object.assign({}, d);
+        const localNewer = Object.values(results).some(r => r.at && (!d.updatedAt || r.at > d.updatedAt));
+        if (!localNewer && d.results) { results = JSON.parse(JSON.stringify(d.results)); if (d.grade) grade = d.grade; saveLocal(); }
+        else if (localNewer) persist();
+        renderAll();
+      } else if (Object.keys(results).length) persist();
+    } catch (e) {}
+  }
+  if (db && isEditor) {
+    statsUnsub = db.collection('stats').onSnapshot(s => { statsRows = s.docs.map(d => d.data() || {}); if (!$('t-pedagog').hidden && tabs.find(t => t.dataset.tab === 'pedagog').getAttribute('aria-selected') === 'true') renderTeacher(); }, () => {});
+  }
+  if ((location.hash || '').slice(1) === 'pedagog') show('pedagog');
+})();
+})();
+</script>
+
+</body></html>
